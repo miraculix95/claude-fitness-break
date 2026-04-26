@@ -6,6 +6,33 @@ A tiny drop-in for [Claude Code](https://claude.com/claude-code) that makes Clau
 
 No prompts. No interruptions. No "would you like to take a break?" dialog from hell. Just: squat, stretch, breathe, build.
 
+## What it looks like
+
+You ask Claude for something non-trivial. It opens with one line, then immediately starts the work:
+
+```
+You: refactor the auth middleware to use the new session service
+
+Claude: 🏋️💪 **Fitness Break** (midday): 10 desk push-ups — then back to work. 💪🏋️
+
+        Reading app/middleware/auth.ts...
+        [normal Claude Code output continues]
+```
+
+Or for the deterministic hook (Option C below), the suggestion is injected before any `Write`/`Edit` tool call:
+
+```
+🏋️💪 **Fitness Break** (morning): 10 bodyweight squats — then back to work. 💪🏋️
+```
+
+German output (when `language: de` / `FITNESS_BREAK_LANG=de`):
+
+```
+🏋️💪 **Fitness Break** (mittags): 30 Sek Brust-Dehnung im Tuerrahmen pro Seite — dann weiter. 💪🏋️
+```
+
+That's it. No buttons, no ack required, no waiting.
+
 ## Why
 
 Claude Code will happily refactor your monorepo while you slowly fuse with the chair. This repo is the smallest possible counterweight: one rule file, one exercise library, one optional hook.
