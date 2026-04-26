@@ -143,13 +143,13 @@ This is **not the default**. You have to explicitly turn it on.
 ```
 [You ask Claude to edit some file]
 
-🏋️ AUSBILDER — wähle: 15 LIEGESTÜTZE / 20 KNIEBEUGEN / 30s PLANK / 25 BURPEES. JETZT.
+🏋️ DRILL SERGEANT — pick: 15 PUSH-UPS / 20 SQUATS / 30s PLANK / 25 BURPEES. NOW.
    ╱ ╲ (spinner runs for 60 seconds while you do them)
 
 [After 60s, the standard Claude Code permission dialog pops up]
 
   Allow Edit on auth.py?
-  [🏋️ AUSBILDER fragt: Hast du die 60s wirklich für Übungen genutzt? Future-Du beobachtet.]
+  [🏋️ DRILL SERGEANT asks: Did you actually use the 60s for exercise? Future-you is watching.]
   1. Yes
   2. Yes, and don't ask again
   3. No, tell Claude what to do differently
