@@ -31,6 +31,8 @@ STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/claude-fitness-break"
 STATE_FILE="$STATE_DIR/last-break"
 MIN_INTERVAL_SECONDS="${FITNESS_BREAK_INTERVAL:-1800}"  # 30 min default
 LANG_CHOICE="${FITNESS_BREAK_LANG:-en}"                 # en (default) | de
+DRILL_SERGEANT="${FITNESS_BREAK_DRILL_SERGEANT:-0}"     # 0 (default) | 1 enables hardcore mode
+DRILL_SECONDS="${FITNESS_BREAK_DRILL_SECONDS:-60}"      # pause duration in drill-sergeant mode
 
 mkdir -p "$STATE_DIR"
 
@@ -41,6 +43,40 @@ last=0
 if (( now - last < MIN_INTERVAL_SECONDS )); then
   exit 0
 fi
+
+# ── Drill Sergeant Mode (opt-in) ──────────────────────────────────────────────
+# Pauses Claude Code for $DRILL_SECONDS while the user does the exercise that's
+# advertised in settings.json `statusMessage`. After the pause, Claude Code
+# pops the standard permission dialog with a confession-style label —
+# the user picks Yes (proceed) or No (block this Edit).
+#
+# REQUIRES: companion `statusMessage` in your settings.json hook entry.
+# Without it the user sees a frozen-looking terminal during the sleep.
+# Recommended setup is in the README ("Drill Sergeant Mode" section).
+
+if [[ "$DRILL_SERGEANT" == "1" ]]; then
+  sleep "$DRILL_SECONDS"
+  echo "$now" > "$STATE_FILE"
+
+  if [[ "$LANG_CHOICE" == "de" ]]; then
+    reason="🏋️ AUSBILDER fragt: Hast du die ${DRILL_SECONDS}s wirklich für Übungen genutzt? Future-Du beobachtet."
+  else
+    reason="🏋️ DRILL SERGEANT asks: Did you actually use the ${DRILL_SECONDS}s for exercise? Future-you is watching."
+  fi
+
+  escaped_reason=$(printf '%s' "$reason" | sed 's/\\/\\\\/g; s/"/\\"/g')
+  cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "ask",
+    "permissionDecisionReason": "$escaped_reason"
+  }
+}
+EOF
+  exit 0
+fi
+# ── End Drill Sergeant Mode ───────────────────────────────────────────────────
 
 hour=$(date +%-H)  # %-H strips leading zero — "09" would be invalid octal in (( )) arithmetic
 

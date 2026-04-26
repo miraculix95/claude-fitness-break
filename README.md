@@ -50,6 +50,7 @@ Three install paths below. Pick by your Claude Code setup, not by gut feel:
 | Heavy `CLAUDE.md` (multiple kB) + many rules competing for attention | **C** (hook) | Model-attention is finite; with a busy instruction set, soft rules can be drowned out. The hook fires deterministically on every Write/Edit and doesn't depend on the model "remembering" the rule. Configurable interval (default 30 min). |
 | You want a guaranteed cadence regardless of what Claude is doing | **C** (hook) | Mechanical timer, configurable interval (default 30 min, can go shorter or longer), ignores task-size judgement. |
 | Any of A/B feels too soft in practice | Combine **A** + **C** | Rule for task-aware suggestions, hook as a hard floor. They don't conflict. |
+| You want hardcore: a real 60s pause + accountability prompt | **C** with **Drill Sergeant Mode** | Hook actually blocks Claude Code while you do the exercise. See section below. |
 
 **Heuristic:** if Claude already follows your rules predictably, A or B works. If you've ever caught yourself thinking *"why didn't Claude do the thing I told it to in CLAUDE.md?"* — your instruction set has grown past the point where soft rules are reliable. Use C.
 
@@ -128,6 +129,81 @@ Pick what you'd actually do — 5-min squats are great in theory, ignored in pra
 The hook emits a JSON `hookSpecificOutput.additionalContext` payload to stdout, which Claude Code injects into the model's context — that's how the message becomes visible. Plain `echo` to stdout/stderr would be silently swallowed (this is a Claude Code hook protocol requirement, not a script bug).
 
 The hook can be combined with Option A or B — rule-based suggestions for thinking-heavy tasks, hook-based for guaranteed coverage on edit-heavy sessions.
+
+## Drill Sergeant Mode (opt-in, hook-only)
+
+> "I will not move on until you confirm you did the push-ups."
+
+A maximalist variant of Option C. Instead of injecting a one-line suggestion that Claude breezes past, the hook **actually pauses Claude Code for 60 seconds** while you do the exercise — then pops a permission dialog asking you to confess whether you did it. No way to skip without lying to your future self.
+
+This is **not the default**. You have to explicitly turn it on.
+
+### What you see
+
+```
+[You ask Claude to edit some file]
+
+🏋️ AUSBILDER — wähle: 15 LIEGESTÜTZE / 20 KNIEBEUGEN / 30s PLANK / 25 BURPEES. JETZT.
+   ╱ ╲ (spinner runs for 60 seconds while you do them)
+
+[After 60s, the standard Claude Code permission dialog pops up]
+
+  Allow Edit on auth.py?
+  [🏋️ AUSBILDER fragt: Hast du die 60s wirklich für Übungen genutzt? Future-Du beobachtet.]
+  1. Yes
+  2. Yes, and don't ask again
+  3. No, tell Claude what to do differently
+```
+
+You pick whatever. Claude Code doesn't actually verify you did anything. The point is the friction: every Yes is a tiny moment of accountability with yourself.
+
+### Setup
+
+Drill Sergeant Mode requires both an env var **and** a `statusMessage` in your `settings.json` hook entry — otherwise the user sits in a frozen-looking terminal during the 60s pause (Claude Code's hook stderr is buffered, so the script can't print live progress; `statusMessage` is the only documented way to surface a live indicator).
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "Write|Edit|MultiEdit",
+      "hooks": [{
+        "type": "command",
+        "command": "FITNESS_BREAK_DRILL_SERGEANT=1 FITNESS_BREAK_LANG=de FITNESS_BREAK_INTERVAL=1800 ~/.claude/hooks/fitness-pre-tool.sh",
+        "statusMessage": "🏋️ AUSBILDER — wähle: 15 LIEGESTÜTZE / 20 KNIEBEUGEN / 30s PLANK / 25 BURPEES. JETZT."
+      }]
+    }]
+  }
+}
+```
+
+The `statusMessage` is **the visible part during the pause** — Claude Code limits you to one static line, so menu format gives you variety without needing dynamic generation. List 3-5 concrete exercises you're actually willing to do; you pick which one each time the prompt fires. Generic phrases like "do something" defeat the purpose — every option has to be specific enough that you can't lie to yourself about whether you did it.
+
+### Tunables
+
+| Env var | Default | Effect |
+|---|---|---|
+| `FITNESS_BREAK_DRILL_SERGEANT` | `0` (off) | Set to `1` to enable |
+| `FITNESS_BREAK_DRILL_SECONDS` | `60` | Pause length in seconds. Match this in your `statusMessage`. |
+| `FITNESS_BREAK_INTERVAL` | `1800` | Min seconds between firings — same as normal mode. Don't go below 1200 in drill-sergeant mode unless you actually want a 60s pause every 5 min. |
+| `FITNESS_BREAK_LANG` | `en` | `de` switches the confession prompt to German. The `statusMessage` is yours to write. |
+
+### English statusMessage example
+
+```json
+"statusMessage": "🏋️ DRILL SERGEANT — pick: 15 PUSH-UPS / 20 SQUATS / 30s PLANK / 25 BURPEES. NOW."
+```
+
+### Why this is provocative on purpose
+
+The honor system **does not** verify you did the exercise. That's intentional. The mechanism is:
+
+1. The pause is **real** — Claude Code is genuinely blocked for 60s, you can't speed past it.
+2. The exercise prescription is **specific** in your own `statusMessage`, so saying "I did 10 squats" requires either doing 10 squats or being a person who lies to permission dialogs alone in their office.
+3. The confession-style permission label puts the cognitive cost of cheating on you, every time.
+
+Will you cheat sometimes? Yes. Will the friction still increase the number of squats per week vs. baseline? Also yes. That's the whole game.
+
+If you find yourself reflexively dismissing the prompt every time, turn it off — the soft-rule mode (Option A/B) is for you. Drill Sergeant is for people who explicitly want hardcore.
 
 ## Language
 
