@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
-# claude-fitness-break — PreToolUse hook (v2 skeleton)
+# claude-fitness-break — PreToolUse hook (v3, JSON output)
 #
-# Fires before Claude Code uses Write/Edit/MultiEdit tools. Emits a micro-break
-# suggestion to stderr, which Claude Code surfaces to the user as additional
-# context. Rate-limited so you don't get a break every 3 seconds.
+# Fires before Claude Code uses Write/Edit/MultiEdit tools. Emits a JSON
+# object with hookSpecificOutput.additionalContext — Claude Code injects
+# that into the model's context, which surfaces the message in the
+# conversation. Rate-limited so you don't get a break every 3 seconds.
+#
+# Earlier versions echo'd plain text (stderr or stdout) — Claude Code
+# silently swallows that. Modern hook protocol requires the JSON shape
+# below for the message to be visible.
 #
 # Wire up in ~/.claude/settings.json:
 #   {
@@ -36,7 +41,7 @@ if (( now - last < MIN_INTERVAL_SECONDS )); then
   exit 0
 fi
 
-hour=$(date +%H)
+hour=$(date +%-H)  # %-H strips leading zero — "09" would be invalid octal in (( )) arithmetic
 if (( hour < 11 )); then
   bucket="morning"
   pool=("10 bodyweight squats" "20 jumping jacks" "1 min standing forward fold" "10 arm circles each direction")
@@ -49,8 +54,21 @@ else
 fi
 
 pick="${pool[RANDOM % ${#pool[@]}]}"
+message="🏋️ Fitness break (${bucket}): ${pick} — then back to work."
 
-echo "🏋️ Fitness break (${bucket}): ${pick} — then back to work." >&2
+# JSON to stdout — Claude Code injects additionalContext into model.
+# Escape any double-quotes / backslashes in message (defensive, pool entries
+# are static and safe but cheap to harden).
+escaped_message=$(printf '%s' "$message" | sed 's/\\/\\\\/g; s/"/\\"/g')
+cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow",
+    "additionalContext": "$escaped_message"
+  }
+}
+EOF
 
 echo "$now" > "$STATE_FILE"
 exit 0
