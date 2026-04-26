@@ -66,7 +66,15 @@ Then wire it into `~/.claude/settings.json`:
 }
 ```
 
-Override the interval with `FITNESS_BREAK_INTERVAL=900` (seconds) in your shell env.
+**Override the interval** by prefixing the command in `settings.json`:
+
+```json
+"command": "FITNESS_BREAK_INTERVAL=600 ~/.claude/hooks/fitness-pre-tool.sh"
+```
+
+(Setting `FITNESS_BREAK_INTERVAL=600` here = 10 minutes between breaks. Default is 1800 = 30 minutes. Note: setting it via shell env-var doesn't reach the hook subprocess — must be inline in the command.)
+
+The hook emits a JSON `hookSpecificOutput.additionalContext` payload to stdout, which Claude Code injects into the model's context — that's how the message becomes visible. Plain `echo` to stdout/stderr would be silently swallowed (this is a Claude Code hook protocol requirement, not a script bug).
 
 The hook can be combined with Option A or B — rule-based suggestions for thinking-heavy tasks, hook-based for guaranteed coverage on edit-heavy sessions.
 
