@@ -78,6 +78,29 @@ The hook emits a JSON `hookSpecificOutput.additionalContext` payload to stdout, 
 
 The hook can be combined with Option A or B — rule-based suggestions for thinking-heavy tasks, hook-based for guaranteed coverage on edit-heavy sessions.
 
+## Language
+
+Default output is **English**. Both the rule snippets (Options A & B) and the hook (Option C) support German as well.
+
+**Option A / B (rule + CLAUDE.md):** edit one line near the top of the file you installed.
+
+```diff
+- language: en   # one of: en | de — change this line to switch the suggestion language
++ language: de
+```
+
+Then start a new Claude Code session — the next break will be in German.
+
+**Option C (hook):** set `FITNESS_BREAK_LANG=de` inline in the `settings.json` command, alongside the interval override:
+
+```json
+"command": "FITNESS_BREAK_LANG=de FITNESS_BREAK_INTERVAL=1800 ~/.claude/hooks/fitness-pre-tool.sh"
+```
+
+(Same caveat as the interval: env-vars set in your shell don't reach the hook subprocess — must be inline.)
+
+Want another language? Open a PR with translated example lines in `RULE_SNIPPET.md` / `CLAUDE_MD_SNIPPET.md` and a parallel pool in `hooks/fitness-pre-tool.sh`. The structure is straightforward to copy.
+
 ## The exercise library
 
 See [`exercises.md`](./exercises.md) — about 20 moves, bucketed by time of day (morning / midday / evening) and duration (30s / 1min / 2min). All desk-friendly, no equipment, nothing that makes you sweat into your keyboard.
@@ -103,7 +126,7 @@ Claude varies the pick. The hook randomizes from a time-of-day pool.
 PRs welcome, especially:
 - more exercises (keep them desk-friendly and short)
 - hook variants for other editors / agents
-- translations of the snippets
+- additional languages (English + German ship today; the structure is the same in `RULE_SNIPPET.md`, `CLAUDE_MD_SNIPPET.md`, and `hooks/fitness-pre-tool.sh`)
 
 ## License
 
