@@ -19,7 +19,7 @@ Claude: 🏋️💪 **Fitness Break** (midday): 10 desk push-ups — then back t
         [normal Claude Code output continues]
 ```
 
-Or for the deterministic hook (Option C below), the suggestion is injected before any `Write`/`Edit` tool call:
+Or for the deterministic hook (Option C below), the suggestion is injected before any `Write`/`Edit` tool call — **rate-limited to once every 30 minutes by default, configurable** to e.g. 10 min via `FITNESS_BREAK_INTERVAL=600`:
 
 ```
 🏋️💪 **Fitness Break** (morning): 10 bodyweight squats — then back to work. 💪🏋️
@@ -47,8 +47,8 @@ Three install paths below. Pick by your Claude Code setup, not by gut feel:
 |---|---|---|
 | Fresh / minimal Claude Code setup, short or no `CLAUDE.md` | **B** (CLAUDE.md snippet) | Lowest-friction install. `CLAUDE.md` is loaded every turn, the rule fires reliably. |
 | You already use `~/.claude/rules/`, modest size | **A** (rule file) | Clean install, no `CLAUDE.md` bloat, Claude estimates task size and skips trivial work. `rm` to disable. |
-| Heavy `CLAUDE.md` (multiple kB) + many rules competing for attention | **C** (hook) | Model-attention is finite; with a busy instruction set, soft rules can be drowned out. The hook fires deterministically on every Write/Edit and doesn't depend on the model "remembering" the rule. |
-| You want a guaranteed cadence regardless of what Claude is doing | **C** (hook) | Mechanical timer, ignores task-size judgement. |
+| Heavy `CLAUDE.md` (multiple kB) + many rules competing for attention | **C** (hook) | Model-attention is finite; with a busy instruction set, soft rules can be drowned out. The hook fires deterministically on every Write/Edit and doesn't depend on the model "remembering" the rule. Configurable interval (default 30 min). |
+| You want a guaranteed cadence regardless of what Claude is doing | **C** (hook) | Mechanical timer, configurable interval (default 30 min, can go shorter or longer), ignores task-size judgement. |
 | Any of A/B feels too soft in practice | Combine **A** + **C** | Rule for task-aware suggestions, hook as a hard floor. They don't conflict. |
 
 **Heuristic:** if Claude already follows your rules predictably, A or B works. If you've ever caught yourself thinking *"why didn't Claude do the thing I told it to in CLAUDE.md?"* — your instruction set has grown past the point where soft rules are reliable. Use C.
@@ -107,13 +107,23 @@ Then wire it into `~/.claude/settings.json`:
 }
 ```
 
-**Override the interval** by prefixing the command in `settings.json`:
+### Hook frequency
+
+By default the hook fires at most **once every 30 minutes** (1800 seconds). Override via `FITNESS_BREAK_INTERVAL` — set inline in the `settings.json` command, **not** as a shell env-var (the hook subprocess doesn't inherit your shell environment):
 
 ```json
 "command": "FITNESS_BREAK_INTERVAL=600 ~/.claude/hooks/fitness-pre-tool.sh"
 ```
 
-(Setting `FITNESS_BREAK_INTERVAL=600` here = 10 minutes between breaks. Default is 1800 = 30 minutes. Note: setting it via shell env-var doesn't reach the hook subprocess — must be inline in the command.)
+| Value | Meaning |
+|---|---|
+| `300` | every 5 min (aggressive — for marathon edit sessions) |
+| `600` | every 10 min |
+| `1800` | every 30 min (default — comfortable for most workflows) |
+| `3600` | every hour (gentle reminder) |
+| `7200` | every 2 hours (almost off — useful as a sanity floor) |
+
+Pick what you'd actually do — 5-min squats are great in theory, ignored in practice. 30 min is the default for a reason.
 
 The hook emits a JSON `hookSpecificOutput.additionalContext` payload to stdout, which Claude Code injects into the model's context — that's how the message becomes visible. Plain `echo` to stdout/stderr would be silently swallowed (this is a Claude Code hook protocol requirement, not a script bug).
 
