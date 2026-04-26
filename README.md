@@ -12,7 +12,21 @@ Claude Code will happily refactor your monorepo while you slowly fuse with the c
 
 It won't fix your posture. It will remind you that you have legs.
 
-## Install — Option A: Rule file (recommended)
+## Which option should I pick?
+
+Three install paths below. Pick by your Claude Code setup, not by gut feel:
+
+| Your situation | Pick | Why |
+|---|---|---|
+| Fresh / minimal Claude Code setup, short or no `CLAUDE.md` | **B** (CLAUDE.md snippet) | Lowest-friction install. `CLAUDE.md` is loaded every turn, the rule fires reliably. |
+| You already use `~/.claude/rules/`, modest size | **A** (rule file) | Clean install, no `CLAUDE.md` bloat, Claude estimates task size and skips trivial work. `rm` to disable. |
+| Heavy `CLAUDE.md` (multiple kB) + many rules competing for attention | **C** (hook) | Model-attention is finite; with a busy instruction set, soft rules can be drowned out. The hook fires deterministically on every Write/Edit and doesn't depend on the model "remembering" the rule. |
+| You want a guaranteed cadence regardless of what Claude is doing | **C** (hook) | Mechanical timer, ignores task-size judgement. |
+| Any of A/B feels too soft in practice | Combine **A** + **C** | Rule for task-aware suggestions, hook as a hard floor. They don't conflict. |
+
+**Heuristic:** if Claude already follows your rules predictably, A or B works. If you've ever caught yourself thinking *"why didn't Claude do the thing I told it to in CLAUDE.md?"* — your instruction set has grown past the point where soft rules are reliable. Use C.
+
+## Install — Option A: Rule file
 
 Drop a single file into `~/.claude/rules/` — Claude Code auto-loads it. Doesn't bloat your `CLAUDE.md`, easy to disable (delete the file), and the rule is applied **only when Claude estimates the task is non-trivial** (>5 minutes of active work). Quick lookups stay quick.
 
