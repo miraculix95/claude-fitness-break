@@ -1,72 +1,61 @@
 # Exercise Library
 
-Curated micro-breaks for developer workdays. Pick based on time of day and duration budget. All exercises are desk-friendly, no equipment, no sweat.
+The fixed pool the break draws from: **30 standard, recognizable, no-equipment moves** (chair / wall / floor optional). Nothing here makes you sweat into your keyboard.
 
-## 🌅 Morning (wake up the body)
+Two knobs decide what you get (set them in the Config block of the rule / snippet you installed):
 
-Goal: get blood flowing, activate posterior chain, wake up the CNS.
+- **`focus`** — which category: `fitness` · `stretching` · `yoga` · `mixed` (rotate across all three).
+- **`intensity`** — `low` · `medium` · `high`. Every move lists three tiers `low / medium / high`; pick the matching number.
 
-### 30 seconds
-- **10 bodyweight squats** — heels down, chest up
-- **10 arm circles each direction** — big, slow
-- **20 jumping jacks** — if your downstairs neighbor allows
-- **Neck rolls** — 5 each direction, slow
-- **30s shoulder shrugs** — up, hold 2s, drop
+The **Fitness** block is the canonical [Scientific 7-Minute Workout](https://www.webmd.com/fitness-exercise/ss/the-7-minute-workout-slideshow) (ACSM Health & Fitness Journal, May/June 2013) plus standard calisthenics.
 
-### 1 minute
-- **20 squats + 10 calf raises**
-- **Standing forward fold** — hang, breathe, let gravity do the work
-- **Cat-cow on chair** — 10 reps, synced with breath
-- **Wall angels** — 10 slow reps against a wall
-- **Hip circles** — 10 each direction, hands on hips
+> Exercise **names always stay in English**, even when `language: de` — only the wrapper words ("los gehts") localize.
 
-### 2 minutes
-- **Sun salutation flow** — 3 rounds, slow
-- **Lunge sequence** — 5 per leg, hold the bottom for a breath
-- **Full-body dynamic stretch** — squats, hip openers, thoracic rotations
+## Fitness (active / 7MWC-style) — `focus: fitness`
 
-## ☀️ Midday (reset, fight the slump)
+| # | Move | low / medium / high |
+|---|------|---------------------|
+| 1 | Jumping jacks | 15 / 25 / 40 |
+| 2 | Push-ups | 10 / 20 / 30 |
+| 3 | Bodyweight squats | 10 / 20 / 30 |
+| 4 | Wall sit | 20s / 40s / 60s |
+| 5 | Plank hold | 20s / 40s / 60s |
+| 6 | Side plank (per side) | 15s / 30s / 45s |
+| 7 | Abdominal crunches | 10 / 20 / 30 |
+| 8 | Lunges (per leg) | 6 / 10 / 15 |
+| 9 | High knees | 20s / 40s / 60s |
+| 10 | Mountain climbers | 20s / 30s / 45s |
+| 11 | Triceps dips (chair edge) | 8 / 15 / 25 |
+| 12 | Calf raises | 15 / 25 / 40 |
 
-Goal: counteract sitting, decompress spine, re-oxygenate.
+## Stretching / mobility — `focus: stretching`
 
-### 30 seconds
-- **Stand up and look at something >20m away** — eye reset
-- **Box breathing 4-4-4-4** — 4 rounds
-- **Shoulder blade squeezes** — 15 reps
-- **Chin tucks** — 10 reps (fixes forward head posture)
-- **Wrist circles** — 10 each direction, both hands
+| # | Move | low / medium / high |
+|---|------|---------------------|
+| 13 | Arm circles (each direction) | 15s / 30s / 45s |
+| 14 | Standing forward fold (hamstring) | 20s / 30s / 45s |
+| 15 | Doorway chest stretch (per side) | 20s / 30s / 45s |
+| 16 | Standing quad stretch (per leg) | 20s / 30s / 45s |
+| 17 | Overhead side bend (per side) | 15s / 30s / 45s |
+| 18 | Neck rolls + shoulder rolls | 15s / 25s / 40s |
+| 19 | Standing spinal twist (per side) | 20s / 30s / 45s |
+| 20 | Single-leg balance (per leg) | 20s / 30s / 45s |
 
-### 1 minute
-- **Desk push-ups** — 15 reps against the edge
-- **Standing side bends** — 10 each side
-- **Doorway chest stretch** — 30s per side
-- **Seated spinal twist** — 30s per side
-- **Glute squeezes** — 20 reps (counteracts dead-butt syndrome)
+## Yoga — `focus: yoga`
 
-### 2 minutes
-- **Walk around the block** — actually leave the chair
-- **10-10-10** — 10 squats, 10 push-ups, 10 lunges
-- **Yoga flow: downdog → cobra → child's pose** — 3 rounds
-- **Hip flexor stretch (couch stretch)** — 1 min per side
+| # | Move | low / medium / high |
+|---|------|---------------------|
+| 21 | Downward dog | 20s / 40s / 60s |
+| 22 | Cobra pose | 15s / 30s / 45s |
+| 23 | Child's pose | 30s / 45s / 60s |
+| 24 | Cat-cow | 5 / 8 / 12 rounds |
+| 25 | Low lunge (per side) | 20s / 30s / 45s |
+| 26 | Warrior II (per side) | 20s / 30s / 45s |
+| 27 | Tree pose (per side) | 20s / 30s / 45s |
+| 28 | Seated forward bend | 20s / 40s / 60s |
+| 29 | Bridge pose | 20s / 30s / 45s |
+| 30 | Sun salutation | 1 / 2 / 3 rounds |
 
-## 🌙 Evening (wind down, prepare for sleep)
+---
 
-Goal: parasympathetic activation, release tension, slow the breath.
-
-### 30 seconds
-- **4-7-8 breathing** — 4 rounds (inhale 4, hold 7, exhale 8)
-- **Forward fold hang** — let the head dangle
-- **Legs-up-the-wall** — 30s, even against your chair
-- **Eye palming** — 30s, warm palms over closed eyes
-
-### 1 minute
-- **Pigeon pose** — 30s per side
-- **Child's pose with deep breathing** — slow nasal breath
-- **Seated meditation** — count 10 breaths
-- **Progressive muscle relaxation** — tense/release from feet up
-
-### 2 minutes
-- **Gentle yin flow** — forward fold, butterfly, reclining twist
-- **Foam roll thoracic spine** — if you have a roller
-- **Box breathing 5-5-5-5** — 8 rounds (longer = deeper para activation)
-- **Savasana** — lie flat, do nothing, resist the urge to check Slack
+Want to tune the numbers to your level? Edit this file — it's just markdown. The rule reads the tier matching your `intensity` setting.

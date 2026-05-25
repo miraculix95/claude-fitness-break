@@ -13,7 +13,7 @@ You ask Claude for something non-trivial. It opens with one line, then immediate
 ```
 You: refactor the auth middleware to use the new session service
 
-Claude: 🏋️💪 **Fitness Break** (midday): 10 desk push-ups — then back to work. 💪🏋️
+Claude: 🏋️💪 **Fitness Break:** 20 push-ups — then back to work. 💪🏋️
 
         Reading app/middleware/auth.ts...
         [normal Claude Code output continues]
@@ -212,8 +212,8 @@ Default output is **English**. Both the rule snippets (Options A & B) and the ho
 **Option A / B (rule + CLAUDE.md):** edit one line near the top of the file you installed.
 
 ```diff
-- language: en   # one of: en | de — change this line to switch the suggestion language
-+ language: de
+- language:  en      # en | de — wrapper words only; exercise NAMES always stay English
++ language:  de
 ```
 
 Then start a new Claude Code session — the next break will be in German.
@@ -230,9 +230,14 @@ Want another language? Open a PR with translated example lines in `RULE_SNIPPET.
 
 ## The exercise library
 
-See [`exercises.md`](./exercises.md) — about 20 moves, bucketed by time of day (morning / midday / evening) and duration (30s / 1min / 2min). All desk-friendly, no equipment, nothing that makes you sweat into your keyboard.
+See [`exercises.md`](./exercises.md) — **30 moves** across three categories (**fitness** / **stretching** / **yoga**), each with **low / medium / high** intensity tiers. All desk-friendly, no equipment, nothing that makes you sweat into your keyboard. The fitness block is the canonical [Scientific 7-Minute Workout](https://www.webmd.com/fitness-exercise/ss/the-7-minute-workout-slideshow) plus standard calisthenics.
 
-Claude varies the pick. The hook randomizes from a time-of-day pool.
+Two knobs in the Config block control what you get:
+
+- **`focus`** — `mixed` (default), `fitness`, `stretching`, or `yoga`.
+- **`intensity`** — `low` / `medium` / `high`, scaling each move (e.g. push-ups `10 / 20 / 30`).
+
+Claude picks one, rotates so it doesn't repeat, and uses the tier matching your `intensity`. Exercise names stay English even on `language: de`. (The `focus` / `intensity` switches are an Option A/B feature; the deterministic hook in Option C uses its own built-in rotating pool.)
 
 ## FAQ
 
