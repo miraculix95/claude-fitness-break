@@ -22,13 +22,13 @@ Claude: 🏋️💪 **Fitness Break:** 20 push-ups — then back to work. 💪�
 Or for the deterministic hook (Option C below), the suggestion is injected before any `Write`/`Edit` tool call — **rate-limited to once every 30 minutes by default, configurable** to e.g. 10 min via `FITNESS_BREAK_INTERVAL=600`:
 
 ```
-🏋️💪 **Fitness Break** (morning): 10 bodyweight squats — then back to work. 💪🏋️
+🏋️💪 **Fitness Break:** 25 jumping jacks — then back to work. 💪🏋️
 ```
 
-German output (when `language: de` / `FITNESS_BREAK_LANG=de`):
+German output (when `language: de` / `FITNESS_BREAK_LANG=de` — exercise names stay English):
 
 ```
-🏋️💪 **Fitness Break** (mittags): 30 Sek Brust-Dehnung im Tuerrahmen pro Seite — dann weiter. 💪🏋️
+🤸🧘 **Stretch:** 30s doorway chest stretch (per side) — dann weiter. 🧘🤸
 ```
 
 That's it. No buttons, no ack required, no waiting.
@@ -129,6 +129,21 @@ Pick what you'd actually do — 5-min squats are great in theory, ignored in pra
 The hook emits a JSON `hookSpecificOutput.additionalContext` payload to stdout, which Claude Code injects into the model's context — that's how the message becomes visible. Plain `echo` to stdout/stderr would be silently swallowed (this is a Claude Code hook protocol requirement, not a script bug).
 
 The hook can be combined with Option A or B — rule-based suggestions for thinking-heavy tasks, hook-based for guaranteed coverage on edit-heavy sessions.
+
+### Hook focus & intensity
+
+The hook draws from the same 30-move pool as the rule ([`exercises.md`](./exercises.md)), with the same two knobs. Set them inline in the `settings.json` command — shell env-vars don't reach the hook subprocess (same caveat as the interval):
+
+| Env var | Default | Values |
+|---|---|---|
+| `FITNESS_BREAK_FOCUS` | `mixed` | `mixed` · `fitness` · `stretching` · `yoga` |
+| `FITNESS_BREAK_INTENSITY` | `medium` | `low` · `medium` · `high` |
+
+```json
+"command": "FITNESS_BREAK_FOCUS=yoga FITNESS_BREAK_INTENSITY=low ~/.claude/hooks/fitness-pre-tool.sh"
+```
+
+Unknown values fall back to the defaults. Exercise names stay English; only the wrapper localizes via `FITNESS_BREAK_LANG`. (Drill Sergeant Mode below is the exception — it uses your own `statusMessage`, not the pool.)
 
 ## Drill Sergeant Mode (opt-in, hook-only)
 
@@ -237,7 +252,7 @@ Two knobs in the Config block control what you get:
 - **`focus`** — `mixed` (default), `fitness`, `stretching`, or `yoga`.
 - **`intensity`** — `low` / `medium` / `high`, scaling each move (e.g. push-ups `10 / 20 / 30`).
 
-Claude picks one, rotates so it doesn't repeat, and uses the tier matching your `intensity`. Exercise names stay English even on `language: de`. (The `focus` / `intensity` switches are an Option A/B feature; the deterministic hook in Option C uses its own built-in rotating pool.)
+Claude picks one, rotates so it doesn't repeat, and uses the tier matching your `intensity`. Exercise names stay English even on `language: de`. The `focus` / `intensity` switches work in all three install options — the hook reads them as env vars (see [Hook focus & intensity](#hook-focus--intensity)).
 
 ## FAQ
 

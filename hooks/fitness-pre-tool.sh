@@ -31,6 +31,8 @@ STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/claude-fitness-break"
 STATE_FILE="$STATE_DIR/last-break"
 MIN_INTERVAL_SECONDS="${FITNESS_BREAK_INTERVAL:-1800}"  # 30 min default
 LANG_CHOICE="${FITNESS_BREAK_LANG:-en}"                 # en (default) | de
+FOCUS="${FITNESS_BREAK_FOCUS:-mixed}"                   # mixed (default) | fitness | stretching | yoga
+INTENSITY="${FITNESS_BREAK_INTENSITY:-medium}"          # low | medium (default) | high
 DRILL_SERGEANT="${FITNESS_BREAK_DRILL_SERGEANT:-0}"     # 0 (default) | 1 enables hardcore mode
 DRILL_SECONDS="${FITNESS_BREAK_DRILL_SECONDS:-60}"      # pause duration in drill-sergeant mode
 
@@ -78,38 +80,77 @@ EOF
 fi
 # ── End Drill Sergeant Mode ───────────────────────────────────────────────────
 
-hour=$(date +%-H)  # %-H strips leading zero — "09" would be invalid octal in (( )) arithmetic
+# ── Normal mode: pick from the fixed 30-exercise pool ─────────────────────────
+# Entries are "category|name|low|medium|high". Exercise NAMES stay English in
+# both languages; only the trailing wrapper localizes. `focus` selects the
+# category (mixed = all three), `intensity` selects which tier number to show.
+
+fitness=(
+  "fitness|jumping jacks|15|25|40"
+  "fitness|push-ups|10|20|30"
+  "fitness|bodyweight squats|10|20|30"
+  "fitness|wall sit|20s|40s|60s"
+  "fitness|plank hold|20s|40s|60s"
+  "fitness|side plank (per side)|15s|30s|45s"
+  "fitness|abdominal crunches|10|20|30"
+  "fitness|lunges (per leg)|6|10|15"
+  "fitness|high knees|20s|40s|60s"
+  "fitness|mountain climbers|20s|30s|45s"
+  "fitness|triceps dips (chair edge)|8|15|25"
+  "fitness|calf raises|15|25|40"
+)
+stretching=(
+  "stretching|arm circles (each direction)|15s|30s|45s"
+  "stretching|standing forward fold|20s|30s|45s"
+  "stretching|doorway chest stretch (per side)|20s|30s|45s"
+  "stretching|standing quad stretch (per leg)|20s|30s|45s"
+  "stretching|overhead side bend (per side)|15s|30s|45s"
+  "stretching|neck rolls + shoulder rolls|15s|25s|40s"
+  "stretching|standing spinal twist (per side)|20s|30s|45s"
+  "stretching|single-leg balance (per leg)|20s|30s|45s"
+)
+yoga=(
+  "yoga|downward dog|20s|40s|60s"
+  "yoga|cobra pose|15s|30s|45s"
+  "yoga|child's pose|30s|45s|60s"
+  "yoga|cat-cow|5 rounds|8 rounds|12 rounds"
+  "yoga|low lunge (per side)|20s|30s|45s"
+  "yoga|warrior II (per side)|20s|30s|45s"
+  "yoga|tree pose (per side)|20s|30s|45s"
+  "yoga|seated forward bend|20s|40s|60s"
+  "yoga|bridge pose|20s|30s|45s"
+  "yoga|sun salutation|1 round|2 rounds|3 rounds"
+)
+
+case "$FOCUS" in
+  fitness)    pool=("${fitness[@]}") ;;
+  stretching) pool=("${stretching[@]}") ;;
+  yoga)       pool=("${yoga[@]}") ;;
+  *)          pool=("${fitness[@]}" "${stretching[@]}" "${yoga[@]}") ;;  # mixed (default)
+esac
+
+entry="${pool[RANDOM % ${#pool[@]}]}"
+IFS='|' read -r cat name low med high <<< "$entry"
+
+case "$INTENSITY" in
+  low)  tier="$low" ;;
+  high) tier="$high" ;;
+  *)    tier="$med" ;;  # medium (default)
+esac
+
+case "$cat" in
+  stretching) e1="🤸🧘"; e2="🧘🤸"; label="Stretch" ;;
+  yoga)       e1="🧘‍♀️🌿"; e2="🌿🧘‍♀️"; label="Yoga" ;;
+  *)          e1="🏋️💪"; e2="💪🏋️"; label="Fitness Break" ;;
+esac
 
 if [[ "$LANG_CHOICE" == "de" ]]; then
-  if (( hour < 11 )); then
-    bucket="morgens"
-    pool=("10 Kniebeugen" "20 Hampelmaenner" "1 Min Vorbeuge im Stehen" "10 Armkreise pro Richtung")
-  elif (( hour < 17 )); then
-    bucket="mittags"
-    pool=("15 Schreibtisch-Liegestuetze" "30 Sek Brust-Dehnung im Tuerrahmen pro Seite" "1 Min Box-Breathing 4-4-4-4" "10-10-10: Squats/Pushups/Lunges" "aufstehen und 30 Sek auf was 20m Entferntes schauen")
-  else
-    bucket="abends"
-    pool=("4-7-8 Atmung, 4 Runden" "30 Sek Taube pro Seite" "1 Min Kindhaltung mit langsamer Atmung" "1 Min Beine-an-die-Wand")
-  fi
-  prefix="**Fitness Break** (${bucket})"
   suffix="— dann weiter."
 else
-  if (( hour < 11 )); then
-    bucket="morning"
-    pool=("10 bodyweight squats" "20 jumping jacks" "1 min standing forward fold" "10 arm circles each direction")
-  elif (( hour < 17 )); then
-    bucket="midday"
-    pool=("15 desk push-ups" "30s doorway chest stretch per side" "box breathing 4-4-4-4 for 1 min" "10-10-10: squats/push-ups/lunges" "stand up and look 20m away for 30s")
-  else
-    bucket="evening"
-    pool=("4-7-8 breathing, 4 rounds" "30s pigeon pose per side" "1 min child's pose with slow breath" "legs-up-the-wall for 1 min")
-  fi
-  prefix="**Fitness Break** (${bucket})"
   suffix="— then back to work."
 fi
 
-pick="${pool[RANDOM % ${#pool[@]}]}"
-message="🏋️💪 ${prefix}: ${pick} ${suffix} 💪🏋️"
+message="${e1} **${label}:** ${tier} ${name} ${suffix} ${e2}"
 
 # JSON to stdout — Claude Code injects additionalContext into model.
 # Escape any double-quotes / backslashes in message (defensive, pool entries
